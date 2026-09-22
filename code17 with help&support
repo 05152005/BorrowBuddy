@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -3082,11 +3083,8 @@ class _HomePageState extends State<HomePage> {
                 _profileMenuTile(
                   Icons.help_outline_rounded,
                   'Help & Support',
-                  'Get help using BorrowBuddy',
-                  () => _showInfoSheet(
-                    'Help & Support',
-                    'Use Borrow and Lend to record transactions, My Items to search them, and History to review returned records.',
-                  ),
+                  'FAQs, guides, support and problem reports',
+                  _showHelpSupportSheet,
                 ),
                 if (widget.user.isAnonymous) ...[
                   const SizedBox(height: 8),
@@ -4680,6 +4678,653 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showHelpSupportSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: _page,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      tooltip: 'Back',
+                      color: _primaryDark,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Expanded(
+                      child: Text(
+                        'Help & Support',
+                        style: TextStyle(
+                          color: _primaryDark,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Get answers, learn how BorrowBuddy works, or send a support message.',
+                  style: TextStyle(color: _muted, fontSize: 12),
+                ),
+                const SizedBox(height: 18),
+                _settingsSectionTitle('Help'),
+                _profileMenuTile(
+                  Icons.quiz_outlined,
+                  'Frequently Asked Questions',
+                  'Quick answers to common BorrowBuddy questions',
+                  () {
+                    _showFaqSheet();
+                  },
+                ),
+                _profileMenuTile(
+                  Icons.menu_book_outlined,
+                  'How to Use BorrowBuddy',
+                  'Learn the main screens and item workflow',
+                  () {
+                    _showHowToUseSheet();
+                  },
+                ),
+                const SizedBox(height: 10),
+                _settingsSectionTitle('Support'),
+                _profileMenuTile(
+                  Icons.support_agent_rounded,
+                  'Contact Support',
+                  'Send a message to the BorrowBuddy support area',
+                  () {
+                    _showSupportMessageDialog(isProblemReport: false);
+                  },
+                ),
+                _profileMenuTile(
+                  Icons.bug_report_outlined,
+                  'Report a Problem',
+                  'Tell us about an issue you found in the app',
+                  () {
+                    _showSupportMessageDialog(isProblemReport: true);
+                  },
+                ),
+                const SizedBox(height: 10),
+                _settingsSectionTitle('About'),
+                _profileMenuTile(
+                  Icons.info_outline_rounded,
+                  'About BorrowBuddy',
+                  'App information and core features',
+                  () {
+                    _showAboutBorrowBuddySheet();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFaqSheet() {
+    final faqs = <Map<String, String>>[
+      {
+        'q': 'What is BorrowBuddy?',
+        'a': 'BorrowBuddy helps you keep track of items you borrowed or lent, who has the item, and when it should be returned.',
+      },
+      {
+        'q': 'What is the difference between Borrowed and Lent?',
+        'a': 'Borrowed means you received the item from another person. Lent means you gave the item to another person.',
+      },
+      {
+        'q': 'How do return reminders work?',
+        'a': 'Active items with a return date can appear in Return Reminders. If phone notifications are enabled on a supported device, BorrowBuddy can schedule a reminder before the due date and on the due date according to your Settings.',
+      },
+      {
+        'q': 'What happens when I mark an item as returned?',
+        'a': 'The item is moved out of your active items and into History so you can still review the completed record.',
+      },
+      {
+        'q': 'Can I edit or delete an item?',
+        'a': 'Yes. Open an active or history item and use the available Edit Item or Delete Record actions.',
+      },
+      {
+        'q': 'Where is my profile picture stored?',
+        'a': 'Your current profile picture is stored in your BorrowBuddy user document in Firestore as profile data.',
+      },
+      {
+        'q': 'Can I use BorrowBuddy as a guest?',
+        'a': 'Yes. A guest can use the app, and the Profile screen provides a Create an Account option so the guest account can be upgraded to email/password authentication.',
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: _page,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * .78,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      tooltip: 'Back',
+                      color: _primaryDark,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Expanded(
+                      child: Text(
+                        'Frequently Asked Questions',
+                        style: TextStyle(
+                          color: _primaryDark,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Common questions about BorrowBuddy.',
+                  style: TextStyle(color: _muted, fontSize: 12),
+                ),
+                const SizedBox(height: 14),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: faqs.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 7),
+                    itemBuilder: (_, index) {
+                      final faq = faqs[index];
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: _border),
+                        ),
+                        child: ExpansionTile(
+                          tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 2,
+                          ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            14,
+                            0,
+                            14,
+                            14,
+                          ),
+                          iconColor: _primary,
+                          collapsedIconColor: _muted,
+                          title: Text(
+                            faq['q']!,
+                            style: const TextStyle(
+                              color: _primaryDark,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                faq['a']!,
+                                style: const TextStyle(
+                                  color: _muted,
+                                  fontSize: 11,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHowToUseSheet() {
+    final steps = <Map<String, dynamic>>[
+      {
+        'icon': Icons.add_circle_outline_rounded,
+        'title': '1. Add an item',
+        'body': 'Use Add Item to enter the item name, choose Borrowed or Lent, add the person, set a due date, and optionally add notes.',
+      },
+      {
+        'icon': Icons.dashboard_outlined,
+        'title': '2. Check your dashboard',
+        'body': 'Home shows your active item totals, overdue items, due-today items, quick actions, and return reminders.',
+      },
+      {
+        'icon': Icons.search_rounded,
+        'title': '3. Find items quickly',
+        'body': 'My Items lets you search by item or person and filter by Borrowed/Lent and due-date status.',
+      },
+      {
+        'icon': Icons.check_circle_outline_rounded,
+        'title': '4. Mark items as returned',
+        'body': 'Open an active item and choose Mark as Returned when the item has been given back. The record moves to History.',
+      },
+      {
+        'icon': Icons.history_rounded,
+        'title': '5. Review History',
+        'body': 'History keeps returned records so you can look back at completed transactions.',
+      },
+      {
+        'icon': Icons.person_outline_rounded,
+        'title': '6. Manage your account',
+        'body': 'Profile contains your profile picture, Settings, Privacy & Security, Help & Support, and account actions.',
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: _page,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * .78,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      tooltip: 'Back',
+                      color: _primaryDark,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Expanded(
+                      child: Text(
+                        'How to Use BorrowBuddy',
+                        style: TextStyle(
+                          color: _primaryDark,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'A quick guide to the main BorrowBuddy workflow.',
+                  style: TextStyle(color: _muted, fontSize: 12),
+                ),
+                const SizedBox(height: 14),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: steps.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (_, index) {
+                      final step = steps[index];
+                      return Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: _border),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(0xffeef0ff),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                step['icon'] as IconData,
+                                color: _primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    step['title'] as String,
+                                    style: const TextStyle(
+                                      color: _primaryDark,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    step['body'] as String,
+                                    style: const TextStyle(
+                                      color: _muted,
+                                      fontSize: 10.5,
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSupportMessageDialog({required bool isProblemReport}) {
+    final controller = TextEditingController();
+    bool saving = false;
+    final title = isProblemReport ? 'Report a Problem' : 'Contact Support';
+    final hint = isProblemReport
+        ? 'Describe what happened, what you expected, and any steps that caused the problem.'
+        : 'Write your question or support message here.';
+
+    showDialog(
+      context: context,
+      barrierDismissible: !saving,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          Future<void> submit() async {
+            final message = controller.text.trim();
+            if (message.isEmpty) {
+              showError(
+                isProblemReport
+                    ? 'Please describe the problem first.'
+                    : 'Please enter your message first.',
+              );
+              return;
+            }
+            setDialogState(() => saving = true);
+            try {
+              final user = FirebaseAuth.instance.currentUser ?? widget.user;
+              final entry = <String, dynamic>{
+                'type': isProblemReport ? 'problem_report' : 'support_message',
+                'message': message,
+                'createdAt': Timestamp.now(),
+              };
+              await usersCollection.doc(user.uid).set({
+                'supportMessages': FieldValue.arrayUnion([entry]),
+                'updatedAt': FieldValue.serverTimestamp(),
+              }, SetOptions(merge: true));
+              if (!mounted) return;
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+              showSuccess(
+                isProblemReport
+                    ? 'Problem report saved successfully.'
+                    : 'Support message saved successfully.',
+              );
+            } catch (_) {
+              if (dialogContext.mounted) setDialogState(() => saving = false);
+              showError('Unable to send your message. Please try again.');
+            }
+          }
+
+          return AlertDialog(
+            titlePadding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+            title: Row(
+              children: [
+                IconButton(
+                  onPressed: saving ? null : () => Navigator.pop(dialogContext),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  tooltip: 'Back',
+                  color: _primaryDark,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: _primaryDark,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 430,
+              child: TextField(
+                controller: controller,
+                minLines: 5,
+                maxLines: 8,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: const TextStyle(color: _muted, fontSize: 11),
+                  filled: true,
+                  fillColor: _page,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: _border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: _border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: _primary),
+                  ),
+                ),
+                style: const TextStyle(color: _primaryDark, fontSize: 12),
+                enabled: !saving,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: saving ? null : () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: saving ? null : submit,
+                style: FilledButton.styleFrom(backgroundColor: _primary),
+                child: saving
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(isProblemReport ? 'Submit Report' : 'Send Message'),
+              ),
+            ],
+          );
+        },
+      ),
+    ).whenComplete(controller.dispose);
+  }
+
+  void _showAboutBorrowBuddySheet() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: _page,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 4, 22, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    tooltip: 'Back',
+                    color: _primaryDark,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'About BorrowBuddy',
+                      style: TextStyle(
+                        color: _primaryDark,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffeef0ff),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.swap_horiz_rounded,
+                      color: _primary,
+                      size: 27,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'BorrowBuddy',
+                          style: TextStyle(
+                            color: _primaryDark,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Borrow and lend tracking',
+                          style: TextStyle(color: _muted, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _border),
+                ),
+                child: const Text(
+                  'BorrowBuddy is designed to help you remember what you borrowed, what you lent, who has each item, and when it is due back. Your account uses Firebase Authentication and your app data is stored in Firestore.',
+                  style: TextStyle(color: _muted, fontSize: 11, height: 1.5),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Core features',
+                style: TextStyle(
+                  color: _primaryDark,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Wrap(
+                spacing: 7,
+                runSpacing: 7,
+                children: [
+                  _helpChip('Borrowed & Lent Items'),
+                  _helpChip('Search & Filters'),
+                  _helpChip('Return Reminders'),
+                  _helpChip('History'),
+                  _helpChip('Profile & Security'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _helpChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xffeef0ff),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: _primaryDark,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
